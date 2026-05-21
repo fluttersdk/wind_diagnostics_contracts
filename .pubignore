@@ -1,0 +1,55 @@
+# .pubignore: controls what `dart pub publish` ships to pub.dev.
+# Same syntax as .gitignore. When this file is present, pub uses it
+# INSTEAD of .gitignore (not in addition), so this file repeats every
+# exclusion .gitignore enforces plus the publish-specific extras.
+#
+# Goal: keep the published archive lean. This package has no example/ or
+# bin/, so the archive is already small; .pubignore mostly guards against
+# accidental shipping of build artifacts and local-state directories.
+
+# ---------------------------------------------------------------------------
+# Build artifacts, generated docs, coverage
+# ---------------------------------------------------------------------------
+build/
+coverage/
+.dart_tool/
+**/doc/api/
+
+# ---------------------------------------------------------------------------
+# Library hygiene: pubspec.lock does not ship per Dart guidelines.
+# https://dart.dev/guides/libraries/private-files#pubspeclock
+# ---------------------------------------------------------------------------
+pubspec.lock
+
+# ---------------------------------------------------------------------------
+# IDE, editor, OS scratch
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+.atom/
+.history
+.swiftpm/
+.svn/
+.build/
+.buildlog/
+migrate_working_dir/
+*.iml
+*.ipr
+*.iws
+*.log
+*.swp
+*.pyc
+*.class
+*.bak
+*.tmp
+.DS_Store
+
+# ---------------------------------------------------------------------------
+# Local state (AI coding tooling, artisan runtime)
+# ---------------------------------------------------------------------------
+.artisan/
+.ac/
+.claude/
+.mcp.json
+CLAUDE.md
+CLAUDE.local.md
