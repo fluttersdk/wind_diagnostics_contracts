@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/fluttersdk/magic/master/.github/magic-logo.svg" width="120" alt="Wind Diagnostics Contracts Logo" />
+  <img src="https://raw.githubusercontent.com/fluttersdk/wind/v1/.github/wind-logo.svg" width="120" alt="Wind Diagnostics Contracts Logo" />
 </p>
 
 <h1 align="center">Wind Diagnostics Contracts</h1>
