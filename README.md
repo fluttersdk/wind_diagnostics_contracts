@@ -5,8 +5,8 @@
 <h1 align="center">Wind Diagnostics Contracts</h1>
 
 <p align="center">
-  <strong>Neutral abstract contracts that let debug-tooling packages read Wind UI widget state without coupling to fluttersdk_wind.</strong><br/>
-  Abstract resolver interface plus process-global registry. Tiny, frozen v1 contract, ~80 LoC.
+  <strong>Wind UI widget state contracts for Flutter debug-tooling and AI agents (MCP).</strong><br/>
+  Zero-dep abstract resolver interface plus process-global registry. The <code>plugin_platform_interface</code> pattern, applied to UI framework and debug tooling decoupling. ~80 LoC, frozen v1 contract.
 </p>
 
 <p align="center">
@@ -25,9 +25,20 @@
 
 ---
 
+## Use cases
+
+This package is the integration seam for any tool that needs runtime Wind UI state without pulling Wind into its compile graph:
+
+- **LLM-agent E2E testing for Flutter**: MCP servers and AI assistants (Claude Code, Cursor, Copilot) that drive a Flutter app need structured widget state (className, breakpoint, brightness, platform, states, colors) per `Element`, not screenshots. This package is the typed contract those tools read.
+- **DevTools extensions**: build a custom Wind inspector tab in Dart DevTools without a hard `fluttersdk_wind` dependency that drags the rendering surface into the extension bundle.
+- **E2E drivers (`fluttersdk_dusk`, `patrol_mcp`, `marionette_mcp`, custom)**: emit a `wind:` block in snapshot YAML / JSON without importing Wind. Tests stop breaking when a className is renamed because the contract surfaces semantic state, not selectors.
+- **Tailwind-on-Flutter authors**: any styling library that follows Wind's className convention can implement this contract to expose its state to the same debug-tooling ecosystem.
+
+---
+
 ## Why this package exists
 
-[Wind UI](https://github.com/fluttersdk/wind) exposes runtime widget state (`className`, `breakpoint`, `brightness`, `platform`, `states`, `bgColor`, `textColor`) that debug-tooling packages such as [`fluttersdk_dusk`](https://github.com/fluttersdk/dusk) embed in their snapshot YAML so LLM agents can reason about the rendered tree.
+[Wind UI](https://github.com/fluttersdk/wind) ([pub.dev](https://pub.dev/packages/fluttersdk_wind)) exposes runtime widget state (`className`, `breakpoint`, `brightness`, `platform`, `states`, `bgColor`, `textColor`) that debug-tooling packages such as [`fluttersdk_dusk`](https://github.com/fluttersdk/dusk) ([pub.dev](https://pub.dev/packages/fluttersdk_dusk)) embed in their snapshot YAML so LLM agents can reason about the rendered tree.
 
 Shipping that handoff through `fluttersdk_wind`'s own surface would force every debug-tool to compile-time depend on Wind, dragging the full rendering surface and bumping debug-tool builds on every Wind release. Shipping it the other way (Wind depending on each debug tool) is even worse.
 
@@ -43,7 +54,7 @@ Shipping that handoff through `fluttersdk_wind`'s own surface would force every 
                                        at snapshot time)
 ```
 
-The pattern mirrors Flutter's `*_platform_interface` convention. `plugin_platform_interface` (the canonical precedent) sits at 4.97M downloads on pub.dev for exactly this reason.
+The pattern mirrors Flutter's `*_platform_interface` convention. [`plugin_platform_interface`](https://pub.dev/packages/plugin_platform_interface) (the canonical precedent) sits at 4.97M downloads on pub.dev for exactly this reason.
 
 ---
 

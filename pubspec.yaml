@@ -1,5 +1,5 @@
 name: fluttersdk_wind_diagnostics_contracts
-description: "Pure abstract contracts that let debug-tooling packages read Wind UI widget state at runtime without compile-time coupling to fluttersdk_wind."
+description: "Wind UI widget state contracts for Flutter debug-tooling and AI agents (MCP). Zero-dep abstract interface implemented in fluttersdk_wind, consumed in fluttersdk_dusk."
 version: 1.0.0
 homepage: https://fluttersdk.com/wind
 repository: https://github.com/fluttersdk/wind_diagnostics_contracts
@@ -8,12 +8,15 @@ documentation: https://fluttersdk.com/wind/diagnostics_contracts
 
 # pub.dev search topics (max 5, lowercase + hyphens, regex ^[a-z][a-z0-9-]{0,31}$).
 # Drives tag-based discovery on https://pub.dev/packages?q=topic%3A<topic>.
+# Selected for 2025-2026 search intent: MCP-driven Flutter testing (mcp-server,
+# ai-agents, flutter-testing) + Wind-ecosystem cluster (wind) + precise audience
+# (debug-tooling).
 topics:
   - wind
-  - diagnostics
+  - mcp-server
+  - ai-agents
+  - flutter-testing
   - debug-tooling
-  - platform-interface
-  - contracts
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
