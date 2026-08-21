@@ -8,6 +8,10 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `analysis_options.yaml` now carries the `analyzer.exclude` block that the Flutter tool's migrator writes, so the migrator is a no-op and a CI checkout stays clean. The migrator runs on every `flutter pub get`, which is the first step of both `ci.yml` and `publish.yml`, and `flutter pub publish --dry-run` later in the same job then reported `1 checked-in file is modified in git` and exited 65. Nothing had caught it because the last CI run here predates the migrator (2026-05-21); the next run on any branch would have failed, and the publish workflow shares the step, so it would have blocked a release too. Verified by reproducing the exit 65 and then confirming a second `pub get` leaves the tree clean with the explanatory comment intact. The same fix landed in `fluttersdk_wind` as #178.
+
 ## [1.0.0] - 2026-05-21
 
 Initial stable release. Neutral abstract contracts that let debug-tooling packages read Wind UI widget state at runtime without a compile-time dependency on `fluttersdk_wind`.
