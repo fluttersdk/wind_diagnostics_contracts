@@ -8,6 +8,10 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- The coverage gate is no longer balanced on a single line. `WindDebugRegistry._()` is a private constructor whose only job is to stop this static-only registry being instantiated, so no test can reach it, and it was one of only five executable lines in the package: coverage sat at exactly 80.00% (LH=4, LF=5) against an 80% floor, and one new uncovered line anywhere would have failed CI. It now carries `// coverage:ignore-line` with the reason above it, which takes the count to 100.00% (LH=4, LF=4). This adds no test; it stops counting a line that cannot be tested. Verified that `flutter test --coverage` honours the pragma in this toolchain rather than assuming it. (`lib/fluttersdk_wind_diagnostics_contracts.dart`)
+
 ### Fixed
 
 - `analysis_options.yaml` now carries the `analyzer.exclude` block that the Flutter tool's migrator writes, so the migrator is a no-op and a CI checkout stays clean. The migrator runs on every `flutter pub get`, which is the first step of both `ci.yml` and `publish.yml`, and `flutter pub publish --dry-run` later in the same job then reported `1 checked-in file is modified in git` and exited 65. Nothing had caught it because the last CI run here predates the migrator (2026-05-21); the next run on any branch would have failed, and the publish workflow shares the step, so it would have blocked a release too. Verified by reproducing the exit 65 and then confirming a second `pub get` leaves the tree clean with the explanatory comment intact. The same fix landed in `fluttersdk_wind` as #178.

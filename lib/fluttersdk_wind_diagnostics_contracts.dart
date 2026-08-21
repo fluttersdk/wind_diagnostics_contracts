@@ -46,7 +46,9 @@ abstract class WindDebugResolver {
 /// `kDebugMode`); debug-tooling consumers look up the current
 /// resolver via [current]. Never registered in release builds.
 class WindDebugRegistry {
-  WindDebugRegistry._();
+  // Unreachable from a test by design: a private constructor whose only job is
+  // to stop this static-only registry being instantiated.
+  WindDebugRegistry._(); // coverage:ignore-line
 
   static WindDebugResolver? _resolver;
 
