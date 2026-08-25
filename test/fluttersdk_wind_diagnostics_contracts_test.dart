@@ -71,7 +71,8 @@ void main() {
     expect(WindDebugRegistry.currentPerf, isNull);
   });
 
-  test('registerPerf stores the resolver and currentPerf returns its stats', () {
+  test('registerPerf stores the resolver and currentPerf returns its stats',
+      () {
     final _FakePerfResolver fake = _FakePerfResolver();
     WindDebugRegistry.registerPerf(fake);
     expect(WindDebugRegistry.currentPerf?.stats()['cacheHits'], equals(7));
