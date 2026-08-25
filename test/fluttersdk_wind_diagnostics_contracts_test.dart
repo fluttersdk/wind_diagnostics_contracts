@@ -16,6 +16,12 @@ class _NoopResolver implements WindDebugResolver {
   Map<String, Object?> resolve(Element element) => const <String, Object?>{};
 }
 
+/// Fake perf resolver that returns a fixed stats map.
+class _FakePerfResolver implements WindPerfResolver {
+  @override
+  Map<String, Object?> stats() => const <String, Object?>{'cacheHits': 7};
+}
+
 void main() {
   setUp(() => WindDebugRegistry.resetForTesting());
 
@@ -60,4 +66,27 @@ void main() {
       expect(noop.resolve(element), equals(const <String, Object?>{}));
     },
   );
+
+  test('WindDebugRegistry.currentPerf returns null when not registered', () {
+    expect(WindDebugRegistry.currentPerf, isNull);
+  });
+
+  test('registerPerf stores the resolver and currentPerf returns its stats', () {
+    final _FakePerfResolver fake = _FakePerfResolver();
+    WindDebugRegistry.registerPerf(fake);
+    expect(WindDebugRegistry.currentPerf?.stats()['cacheHits'], equals(7));
+  });
+
+  test('resetForTesting clears the perf slot', () {
+    WindDebugRegistry.registerPerf(_FakePerfResolver());
+    WindDebugRegistry.resetForTesting();
+    expect(WindDebugRegistry.currentPerf, isNull);
+  });
+
+  test('registering a perf resolver leaves the debug slot untouched', () {
+    final _FakeResolver fakeDebug = _FakeResolver();
+    WindDebugRegistry.register(fakeDebug);
+    WindDebugRegistry.registerPerf(_FakePerfResolver());
+    expect(WindDebugRegistry.current, same(fakeDebug));
+  });
 }

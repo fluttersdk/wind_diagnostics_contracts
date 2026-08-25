@@ -8,6 +8,14 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- **`WindPerfResolver` abstract class** (`lib/fluttersdk_wind_diagnostics_contracts.dart`): a second, separate contract alongside `WindDebugResolver`, with a single method `Map<String, Object?> stats()`. Where `WindDebugResolver.resolve(Element)` resolves per-Element widget state, `WindPerfResolver.stats()` resolves process-wide performance counters that have no single Element to attach to. The returned map's key set is pinned as the cross-repo contract read by `fluttersdk_dusk`'s performance snapshot, all `int`: `cacheHits`, `cacheMisses`, `cacheBypasses`, `cacheSize`, `wDivBuilds`, `wTextBuilds`. Additive-growth rule applies: new keys are a minor bump, renaming or removing a key is a major bump.
+
+- **`WindDebugRegistry` perf slot**: a second, distinct static slot mirroring the existing debug-resolver triad. `WindDebugRegistry.currentPerf` (getter, `null` when unregistered), `WindDebugRegistry.registerPerf(resolver)` (canonical install path, idempotent, most-recent-call wins). `resetForTesting()` now clears both slots. Registering a perf resolver never touches the debug slot and vice versa.
+
+- **4 contract tests** (`test/fluttersdk_wind_diagnostics_contracts_test.dart`): null-when-unregistered, register stores + lookup via `stats()`, `resetForTesting` clears the perf slot, and registering a perf resolver leaves the debug slot untouched.
+
 ### Changed
 
 - The coverage gate is no longer balanced on a single line. `WindDebugRegistry._()` is a private constructor whose only job is to stop this static-only registry being instantiated, so no test can reach it, and it was one of only five executable lines in the package: coverage sat at exactly 80.00% (LH=4, LF=5) against an 80% floor, and one new uncovered line anywhere would have failed CI. It now carries `// coverage:ignore-line` with the reason above it, which takes the count to 100.00% (LH=4, LF=4). This adds no test; it stops counting a line that cannot be tested. Verified that `flutter test --coverage` honours the pragma in this toolchain rather than assuming it. (`lib/fluttersdk_wind_diagnostics_contracts.dart`)
