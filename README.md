@@ -129,7 +129,7 @@ final Map<String, Object?> stats = perf.stats();
 // cacheHits, cacheMisses, cacheBypasses, cacheSize, wDivBuilds, wTextBuilds; all int.
 ```
 
-Wind installs it with `Wind.installPerfResolver()`, separately from `installDebugResolver()`, because the two answer different questions and a host may want one without the other. Counting itself stays off until wind's own flag is set, so installing the resolver costs nothing.
+Wind installs it with `Wind.installPerfResolver()`, separately from `installDebugResolver()`, because the two answer different questions and a host may want one without the other. Counting itself stays off until wind's own flag is set, so installing the resolver costs nothing. That method ships in the `fluttersdk_wind` release that pairs with this contract; a reader on an earlier wind will not find it yet.
 
 The `null` is worth passing through rather than flattening to zeros: it is what lets a consumer tell "no resolver was ever registered" from "the counters really are zero".
 

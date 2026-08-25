@@ -16,7 +16,6 @@ class _NoopResolver implements WindDebugResolver {
   Map<String, Object?> resolve(Element element) => const <String, Object?>{};
 }
 
-/// Fake perf resolver that returns a fixed stats map.
 /// A second fake, so idempotency can be asserted with `same`. Two
 /// `const _FakePerfResolver()` instances are canonicalised to one object and
 /// would pass whether the second register ran or not.
@@ -25,6 +24,7 @@ class _SecondFakePerfResolver implements WindPerfResolver {
   Map<String, Object?> stats() => const <String, Object?>{'cacheHits': 99};
 }
 
+/// Fake perf resolver that returns a fixed stats map.
 class _FakePerfResolver implements WindPerfResolver {
   @override
   Map<String, Object?> stats() => const <String, Object?>{'cacheHits': 7};
