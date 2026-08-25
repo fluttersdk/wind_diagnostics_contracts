@@ -8,6 +8,10 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] - 2026-08-25
+
 ### Added
 
 - **`WindPerfResolver` abstract class** (`lib/fluttersdk_wind_diagnostics_contracts.dart`): a second, separate contract alongside `WindDebugResolver`, with a single method `Map<String, Object?> stats()`. Where `WindDebugResolver.resolve(Element)` resolves per-Element widget state, `WindPerfResolver.stats()` resolves process-wide performance counters that have no single Element to attach to. The returned map's key set is pinned as the cross-repo contract read by `fluttersdk_dusk`'s performance snapshot, all `int`: `cacheHits`, `cacheMisses`, `cacheBypasses`, `cacheSize`, `wDivBuilds`, `wTextBuilds`. Additive-growth rule applies: new keys are a minor bump, renaming or removing a key is a major bump.
