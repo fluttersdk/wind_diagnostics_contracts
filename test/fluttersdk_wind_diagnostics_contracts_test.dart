@@ -17,6 +17,14 @@ class _NoopResolver implements WindDebugResolver {
 }
 
 /// Fake perf resolver that returns a fixed stats map.
+/// A second fake, so idempotency can be asserted with `same`. Two
+/// `const _FakePerfResolver()` instances are canonicalised to one object and
+/// would pass whether the second register ran or not.
+class _SecondFakePerfResolver implements WindPerfResolver {
+  @override
+  Map<String, Object?> stats() => const <String, Object?>{'cacheHits': 99};
+}
+
 class _FakePerfResolver implements WindPerfResolver {
   @override
   Map<String, Object?> stats() => const <String, Object?>{'cacheHits': 7};
@@ -82,6 +90,28 @@ void main() {
     WindDebugRegistry.registerPerf(_FakePerfResolver());
     WindDebugRegistry.resetForTesting();
     expect(WindDebugRegistry.currentPerf, isNull);
+  });
+
+  test('registerPerf is idempotent: most-recent-call wins', () {
+    // The perf docstring makes the same idempotency promise as the debug
+    // slot's, and the debug slot has a test for it. Without this one the
+    // promise was prose only.
+    WindDebugRegistry.registerPerf(_FakePerfResolver());
+
+    final _SecondFakePerfResolver latest = _SecondFakePerfResolver();
+    WindDebugRegistry.registerPerf(latest);
+
+    expect(WindDebugRegistry.currentPerf, same(latest));
+  });
+
+  test('registerPerfForTesting installs a fake into the perf slot only', () {
+    final _FakeResolver debug = _FakeResolver();
+    WindDebugRegistry.register(debug);
+
+    WindDebugRegistry.registerPerfForTesting(_SecondFakePerfResolver());
+
+    expect(WindDebugRegistry.currentPerf, isA<_SecondFakePerfResolver>());
+    expect(WindDebugRegistry.current, same(debug));
   });
 
   test('registering a perf resolver leaves the debug slot untouched', () {

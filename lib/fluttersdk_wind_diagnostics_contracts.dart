@@ -1,10 +1,17 @@
 /// Pure abstract contracts for Wind UI diagnostic introspection.
 ///
-/// Wind UI exposes its runtime widget state (className, breakpoint,
-/// brightness, platform, states, bgColor, textColor) at snapshot time
-/// via a `WindDebugResolver` implementation. Debug-tooling packages
-/// (e.g., fluttersdk_dusk for E2E snapshots, future devtools-aware
-/// inspectors) consume that state through `WindDebugRegistry.current`
+/// Two independent contracts, each with its own registry slot.
+///
+/// `WindDebugResolver` answers per-Element questions: the runtime widget
+/// state (className, breakpoint, brightness, platform, states, bgColor,
+/// textColor) at snapshot time. `WindPerfResolver` answers process-wide
+/// ones: the aggregate counters (cache hits, misses, bypasses, build
+/// counts) that belong to no single element and so have nowhere to live
+/// on the first contract.
+///
+/// Debug-tooling packages (e.g., fluttersdk_dusk for E2E snapshots and
+/// performance sessions, future devtools-aware inspectors) consume them
+/// through `WindDebugRegistry.current` and `WindDebugRegistry.currentPerf`
 /// without ever importing wind types directly.
 ///
 /// Neither wind nor consumers of this contract package compile-time
@@ -119,5 +126,15 @@ class WindDebugRegistry {
   @visibleForTesting
   static void registerForTesting(WindDebugResolver resolver) {
     _resolver = resolver;
+  }
+
+  /// Test-only override for the perf slot. The sibling of
+  /// [registerForTesting], and it exists for the same reason: [registerPerf]
+  /// is documented as wind's canonical install path, so a consumer's test
+  /// installing a fake through it reads as production wiring at the call
+  /// site.
+  @visibleForTesting
+  static void registerPerfForTesting(WindPerfResolver resolver) {
+    _perfResolver = resolver;
   }
 }

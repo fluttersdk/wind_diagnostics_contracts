@@ -14,7 +14,9 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.
 
 - **`WindDebugRegistry` perf slot**: a second, distinct static slot mirroring the existing debug-resolver triad. `WindDebugRegistry.currentPerf` (getter, `null` when unregistered), `WindDebugRegistry.registerPerf(resolver)` (canonical install path, idempotent, most-recent-call wins). `resetForTesting()` now clears both slots. Registering a perf resolver never touches the debug slot and vice versa.
 
-- **4 contract tests** (`test/fluttersdk_wind_diagnostics_contracts_test.dart`): null-when-unregistered, register stores + lookup via `stats()`, `resetForTesting` clears the perf slot, and registering a perf resolver leaves the debug slot untouched.
+- **`WindDebugRegistry.registerPerfForTesting`**: the sibling of `registerForTesting`, and it exists for the same reason. `registerPerf` is documented as wind's canonical install path, so a consumer's test installing a fake through it reads as production wiring at the call site.
+
+- **6 contract tests** (`test/fluttersdk_wind_diagnostics_contracts_test.dart`): null-when-unregistered, register stores + lookup via `stats()`, `resetForTesting` clears the perf slot, registering a perf resolver leaves the debug slot untouched, `registerPerf` idempotency (most-recent-call wins), and `registerPerfForTesting` touching only the perf slot.
 
 ### Changed
 
