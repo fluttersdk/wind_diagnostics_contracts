@@ -1,10 +1,17 @@
 /// Pure abstract contracts for Wind UI diagnostic introspection.
 ///
-/// Wind UI exposes its runtime widget state (className, breakpoint,
-/// brightness, platform, states, bgColor, textColor) at snapshot time
-/// via a `WindDebugResolver` implementation. Debug-tooling packages
-/// (e.g., fluttersdk_dusk for E2E snapshots, future devtools-aware
-/// inspectors) consume that state through `WindDebugRegistry.current`
+/// Two independent contracts, each with its own registry slot.
+///
+/// `WindDebugResolver` answers per-Element questions: the runtime widget
+/// state (className, breakpoint, brightness, platform, states, bgColor,
+/// textColor) at snapshot time. `WindPerfResolver` answers process-wide
+/// ones: the aggregate counters (cache hits, misses, bypasses, build
+/// counts) that belong to no single element and so have nowhere to live
+/// on the first contract.
+///
+/// Debug-tooling packages (e.g., fluttersdk_dusk for E2E snapshots and
+/// performance sessions, future devtools-aware inspectors) consume them
+/// through `WindDebugRegistry.current` and `WindDebugRegistry.currentPerf`
 /// without ever importing wind types directly.
 ///
 /// Neither wind nor consumers of this contract package compile-time
@@ -40,22 +47,55 @@ abstract class WindDebugResolver {
   Map<String, Object?> resolve(Element element);
 }
 
-/// Process-global registry for the single active `WindDebugResolver`.
+/// Resolves aggregate Wind runtime performance statistics.
 ///
-/// Wind installs its concrete resolver at app boot (gated by
+/// Implementations live in `fluttersdk_wind` (production) and test
+/// fakes (debug-only). This is a SECOND, separate contract from
+/// [WindDebugResolver]: that one resolves per-Element widget state,
+/// this one resolves process-wide counters that have no single
+/// Element to attach to (cache hits/misses/bypasses, build counts).
+///
+/// Frozen contract for the 1.x line; additive changes only (new keys
+/// in the returned Map allowed; renaming or removing existing keys
+/// requires a major bump).
+abstract class WindPerfResolver {
+  /// Returns a Map of aggregate Wind performance counters.
+  ///
+  /// The returned Map's key set is documented as the cross-repo
+  /// contract read by `fluttersdk_dusk`'s performance snapshot:
+  /// - `cacheHits`: `int`
+  /// - `cacheMisses`: `int`
+  /// - `cacheBypasses`: `int`
+  /// - `cacheSize`: `int`
+  /// - `wDivBuilds`: `int`
+  /// - `wTextBuilds`: `int`
+  Map<String, Object?> stats();
+}
+
+/// Process-global registry for the single active `WindDebugResolver`
+/// and the single active `WindPerfResolver`.
+///
+/// Wind installs its concrete resolvers at app boot (gated by
 /// `kDebugMode`); debug-tooling consumers look up the current
-/// resolver via [current]. Never registered in release builds.
+/// resolver via [current] / [currentPerf]. Never registered in
+/// release builds.
 class WindDebugRegistry {
   // Unreachable from a test by design: a private constructor whose only job is
   // to stop this static-only registry being instantiated.
   WindDebugRegistry._(); // coverage:ignore-line
 
   static WindDebugResolver? _resolver;
+  static WindPerfResolver? _perfResolver;
 
   /// Returns the registered resolver or `null` when wind has not
   /// installed one (release build, or `Wind.installDebugResolver()`
   /// was never called).
   static WindDebugResolver? get current => _resolver;
+
+  /// Returns the registered perf resolver or `null` when wind has
+  /// not installed one (release build, or the perf resolver was
+  /// never registered).
+  static WindPerfResolver? get currentPerf => _perfResolver;
 
   /// Registers the resolver. Idempotent; the most recent call wins.
   ///
@@ -65,10 +105,19 @@ class WindDebugRegistry {
     _resolver = resolver;
   }
 
-  /// Test-only reset. Drops the registered resolver.
+  /// Registers the perf resolver. Idempotent; the most recent call
+  /// wins. Mirrors [register] but occupies a distinct slot so
+  /// registering one never overwrites the other.
+  static void registerPerf(WindPerfResolver resolver) {
+    _perfResolver = resolver;
+  }
+
+  /// Test-only reset. Drops both the registered resolver and the
+  /// registered perf resolver.
   @visibleForTesting
   static void resetForTesting() {
     _resolver = null;
+    _perfResolver = null;
   }
 
   /// Test-only override. Reassigns the registered resolver to a
@@ -77,5 +126,15 @@ class WindDebugRegistry {
   @visibleForTesting
   static void registerForTesting(WindDebugResolver resolver) {
     _resolver = resolver;
+  }
+
+  /// Test-only override for the perf slot. The sibling of
+  /// [registerForTesting], and it exists for the same reason: [registerPerf]
+  /// is documented as wind's canonical install path, so a consumer's test
+  /// installing a fake through it reads as production wiring at the call
+  /// site.
+  @visibleForTesting
+  static void registerPerfForTesting(WindPerfResolver resolver) {
+    _perfResolver = resolver;
   }
 }

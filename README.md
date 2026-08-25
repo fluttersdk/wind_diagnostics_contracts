@@ -117,9 +117,25 @@ void emitWindBlock(StringBuffer buffer, Element element) {
 
 The returned map's key set is documented as the v1 frozen contract (see [CHANGELOG.md](CHANGELOG.md) for the full key list).
 
+### Reading aggregate performance counters
+
+`WindDebugResolver` answers per-`Element` questions, so it has nowhere to put a number that belongs to no single element: a cache hit rate, a build count. `WindPerfResolver` is a second, independent contract for exactly those, with its own registry slot. Registering one never touches the other.
+
+```dart
+final WindPerfResolver? perf = WindDebugRegistry.currentPerf;
+if (perf == null) return; // wind not in this app, or the resolver was never installed.
+
+final Map<String, Object?> stats = perf.stats();
+// cacheHits, cacheMisses, cacheBypasses, cacheSize, wDivBuilds, wTextBuilds; all int.
+```
+
+Wind installs it with `Wind.installPerfResolver()`, separately from `installDebugResolver()`, because the two answer different questions and a host may want one without the other. Counting itself stays off until wind's own flag is set, so installing the resolver costs nothing. That method ships in the `fluttersdk_wind` release that pairs with this contract; a reader on an earlier wind will not find it yet.
+
+The `null` is worth passing through rather than flattening to zeros: it is what lets a consumer tell "no resolver was ever registered" from "the counters really are zero".
+
 ### Test seams
 
-`WindDebugRegistry` exposes two `@visibleForTesting` helpers so debug-tool tests can register fake resolvers without going through Wind:
+`WindDebugRegistry` exposes four `@visibleForTesting` helpers so debug-tool tests can register fake resolvers without going through Wind. `resetForTesting()` clears BOTH slots; `registerForTesting` and `registerPerfForTesting` install a fake into one each:
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
@@ -152,7 +168,7 @@ void main() {
 
 ## Versioning
 
-This package follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). The `WindDebugResolver.resolve` return-map key set is the load-bearing v1 contract: additive changes (new keys in the returned map) are non-breaking; renaming or removing existing keys requires a major bump.
+This package follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). Two return-map key sets are the load-bearing contract, `WindDebugResolver.resolve`'s and `WindPerfResolver.stats`'s, and the same rule governs both: additive changes (new keys in the returned map) are non-breaking; renaming or removing existing keys requires a major bump. Adding a METHOD to either contract is breaking, since it breaks every implementer including the test fakes, which is why the perf counters got a second contract rather than a second method on the first.
 
 ---
 
