@@ -1,0 +1,73 @@
+# Dependabot config for fluttersdk/wind_diagnostics_contracts
+#
+# This package is deliberately tiny: `meta` and `flutter_lints` are the whole
+# dependency surface, and that is the point. It sits between wind and dusk so
+# neither has to depend on the other, so a dependency added here would be a
+# dependency forced on both. There is no fluttersdk group below for the same
+# reason: this package depends on no sibling, and if it ever does, that is a
+# design decision rather than a bump.
+#
+# Grouping policy matches the rest of the ecosystem: minor + patch roll up into
+# one weekly PR per bucket, a major opens its own PR. `dependabot-auto-merge.yml`
+# arms auto-merge for github-actions minor + patch only.
+#
+# The default branch here is `develop`, so that is where Dependabot targets.
+
+version: 2
+
+updates:
+  # Package deps (pubspec.yaml at /)
+  - package-ecosystem: pub
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Istanbul
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - pub
+    assignees:
+      - anilcancakir
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions under .github/workflows/
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Istanbul
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    assignees:
+      - anilcancakir
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions-official:
+        patterns:
+          - actions/*
+      release-stack:
+        patterns:
+          - dart-lang/*
+          - subosito/*
+          - softprops/*
+          - codecov/*
+      dependabot-helpers:
+        patterns:
+          - dependabot/*
