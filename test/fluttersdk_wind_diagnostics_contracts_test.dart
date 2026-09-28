@@ -24,6 +24,39 @@ class _SecondFakePerfResolver implements WindPerfResolver {
   Map<String, Object?> stats() => const <String, Object?>{'cacheHits': 99};
 }
 
+/// Fake perf resolver that returns all nine keys (six existing plus three new).
+/// Used for contract assertion that dusk-style reading code can type-check
+/// the new Map-typed perf keys.
+class _CompletePerfResolver implements WindPerfResolver {
+  @override
+  Map<String, Object?> stats() => <String, Object?>{
+        // Existing keys (six)
+        'cacheHits': 100,
+        'cacheMisses': 50,
+        'cacheBypasses': 25,
+        'cacheSize': 1024,
+        'wDivBuilds': 200,
+        'wTextBuilds': 150,
+        // New keys (three)
+        'widgetBuilds': <String, int>{
+          'WDiv': 10,
+          'WText': 5,
+          'WButton': 3,
+        },
+        'wrapperEmissions': <String, int>{
+          'Opacity': 8,
+          'Padding': 12,
+          'ClipRRect': 4,
+        },
+        'inheritedReads': <String, int>{
+          'mediaQuerySize': 7,
+          'mediaQueryBrightness': 3,
+          'windTheme': 15,
+          'defaultTextStyle': 2,
+        },
+      };
+}
+
 /// Fake perf resolver that returns a fixed stats map.
 class _FakePerfResolver implements WindPerfResolver {
   @override
@@ -120,4 +153,41 @@ void main() {
     WindDebugRegistry.registerPerf(_FakePerfResolver());
     expect(WindDebugRegistry.current, same(fakeDebug));
   });
+
+  test(
+    'WindPerfResolver.stats() includes three new Map-typed perf keys that dusk can type-check',
+    () {
+      // 1. Register a complete fake that returns all nine keys.
+      final _CompletePerfResolver complete = _CompletePerfResolver();
+      WindDebugRegistry.registerPerf(complete);
+
+      // 2. Read the stats (simulating dusk-style reading).
+      final Map<String, Object?> stats =
+          WindDebugRegistry.currentPerf?.stats() ?? <String, Object?>{};
+
+      // 3. Verify the three new keys are present and have the correct types.
+      expect(stats['widgetBuilds'], isA<Map<String, int>>());
+      expect(stats['wrapperEmissions'], isA<Map<String, int>>());
+      expect(stats['inheritedReads'], isA<Map<String, int>>());
+
+      // 4. Verify the specific values for the new keys.
+      final Map<String, int> widgetBuilds =
+          stats['widgetBuilds'] as Map<String, int>;
+      expect(widgetBuilds['WDiv'], equals(10));
+      expect(widgetBuilds['WText'], equals(5));
+      expect(widgetBuilds['WButton'], equals(3));
+
+      final Map<String, int> wrapperEmissions =
+          stats['wrapperEmissions'] as Map<String, int>;
+      expect(wrapperEmissions['Opacity'], equals(8));
+      expect(wrapperEmissions['Padding'], equals(12));
+
+      final Map<String, int> inheritedReads =
+          stats['inheritedReads'] as Map<String, int>;
+      expect(inheritedReads['mediaQuerySize'], equals(7));
+      expect(inheritedReads['mediaQueryBrightness'], equals(3));
+      expect(inheritedReads['windTheme'], equals(15));
+      expect(inheritedReads['defaultTextStyle'], equals(2));
+    },
+  );
 }

@@ -69,6 +69,9 @@ abstract class WindPerfResolver {
   /// - `cacheSize`: `int`
   /// - `wDivBuilds`: `int`
   /// - `wTextBuilds`: `int`
+  /// - `widgetBuilds`: `Map<String,int>`, W-widget type name to build count.
+  /// - `wrapperEmissions`: `Map<String,int>`, Flutter wrapper type emitted by wind to count.
+  /// - `inheritedReads`: `Map<String,int>`, keys are `mediaQuerySize`, `mediaQueryBrightness`, `windTheme`, `defaultTextStyle` to count.
   Map<String, Object?> stats();
 }
 
