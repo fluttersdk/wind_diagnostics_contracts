@@ -10,7 +10,7 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.
 
 ### Added
 
-- **Three new `WindPerfResolver.stats()` keys** (`lib/fluttersdk_wind_diagnostics_contracts.dart:74-76`): additive contract extension for LLM-first performance analysis. All three are `Map<String,int>`:
+- **Three new `WindPerfResolver.stats()` keys** (`lib/fluttersdk_wind_diagnostics_contracts.dart:72-76`): additive contract extension for LLM-first performance analysis. All three are `Map<String,int>`:
   - `widgetBuilds`: W-widget type name to build count.
   - `wrapperEmissions`: Flutter wrapper type emitted by wind to count.
   - `inheritedReads`: counted reads of `mediaQuerySize`, `mediaQueryBrightness`, `windTheme`, `defaultTextStyle`.
