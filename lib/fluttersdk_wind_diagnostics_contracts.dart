@@ -74,6 +74,11 @@ abstract class WindPerfResolver {
   ///   by wind to count.
   /// - `inheritedReads`: `Map<String,int>`, keys are `mediaQuerySize`,
   ///   `mediaQueryBrightness`, `windTheme`, `defaultTextStyle` to count.
+  ///
+  /// `wDivBuilds` and `wTextBuilds` report the same counts as
+  /// `widgetBuilds['WDiv']` and `widgetBuilds['WText']`. They stay for the
+  /// 1.x line because removing a key needs a major bump; a new reader should
+  /// take per-type counts from `widgetBuilds`.
   Map<String, Object?> stats();
 }
 
@@ -81,7 +86,7 @@ abstract class WindPerfResolver {
 /// and the single active `WindPerfResolver`.
 ///
 /// Wind installs its concrete resolvers at app boot (gated by
-/// `kDebugMode`); debug-tooling consumers look up the current
+/// `!kReleaseMode`, so debug and profile builds); debug-tooling consumers look up the current
 /// resolver via [current] / [currentPerf]. Never registered in
 /// release builds.
 class WindDebugRegistry {

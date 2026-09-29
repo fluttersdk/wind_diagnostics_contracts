@@ -14,7 +14,7 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.
   - `widgetBuilds`: W-widget type name to build count.
   - `wrapperEmissions`: Flutter wrapper type emitted by wind to count.
   - `inheritedReads`: counted reads of `mediaQuerySize`, `mediaQueryBrightness`, `windTheme`, `defaultTextStyle`.
-  Existing six keys (`cacheHits`, `cacheMisses`, `cacheBypasses`, `cacheSize`, `wDivBuilds`, `wTextBuilds`) are unchanged; renaming or removing any key requires a major bump. `fluttersdk_dusk` perf snapshots will consume these keys to enrich performance profiles with widget-level and inherited-widget-read metrics.
+  Existing six keys (`cacheHits`, `cacheMisses`, `cacheBypasses`, `cacheSize`, `wDivBuilds`, `wTextBuilds`) are unchanged; renaming or removing any key requires a major bump. `wDivBuilds` and `wTextBuilds` now duplicate `widgetBuilds['WDiv']` and `widgetBuilds['WText']`; they stay for the 1.x line, and a new reader should take per-type counts from `widgetBuilds`. `fluttersdk_dusk` perf snapshots will consume these keys to enrich performance profiles with widget-level and inherited-widget-read metrics.
 
 - **Contract assertion test** (`test/fluttersdk_wind_diagnostics_contracts_test.dart:157-192`): `_CompletePerfResolver` fake returning all nine keys, and a test verifying that dusk-style reading code can type-check the three new keys as `Map<String,int>` and access their expected sub-keys.
 
